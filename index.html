@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kvantový Randomizer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #randomValue {
+      font-size: 2em;
+      margin: 20px;
+    }
+    button {
+      font-size: 1em;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kvantový Randomizer</h1>
+  <div id="randomValue">Čaká sa na číslo...</div>
+  <button id="fetchButton">Generovať náhodné číslo</button>
+
+  <script>
+    async function fetchQuantumRandomNumber() {
+      try {
+        // Používame bezplatné API ANU QRNG, ktoré je verejne dostupné
+        const response = await fetch('https://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint8');
+        const data = await response.json();
+        if (data && data.data && data.data.length > 0) {
+          return data.data[0];
+        } else {
+          throw new Error('Nedostatočné dáta z API');
+        }
+      } catch (error) {
+        console.error('Chyba pri získavaní kvantového náhodného čísla:', error);
+        return null;
+      }
+    }
+
+    async function generateRandomNumber() {
+      const randomValueDiv = document.getElementById('randomValue');
+      randomValueDiv.textContent = 'Generujem...';
+      const randomNumber = await fetchQuantumRandomNumber();
+      if (randomNumber !== null) {
+        randomValueDiv.textContent = 'Kvantové číslo: ' + randomNumber;
+      } else {
+        // Fallback na pseudo-náhodné číslo v prípade chyby
+        randomValueDiv.textContent = 'Chyba, použijem pseudo-náhodné číslo: ' + Math.floor(Math.random() * 256);
+      }
+    }
+
+    // Pri načítaní stránky sa automaticky vygeneruje číslo
+    window.onload = function() {
+      generateRandomNumber();
+    };
+
+    // Tlačidlo pre opätovné generovanie čísla
+    document.getElementById('fetchButton').addEventListener('click', generateRandomNumber);
+  </script>
+</body>
+</html>
